@@ -1,5 +1,12 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Mapster;
+using MapsterMapper;
+using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
+using SurveyBasketAPI.Validations;
+using System.Reflection;
 
 namespace SurveyBasketAPI
 {
@@ -11,11 +18,8 @@ namespace SurveyBasketAPI
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddScoped<IPollService,PollService>();
+            builder.Services.AddDepenencies();
+        
 
             var app = builder.Build();
 
