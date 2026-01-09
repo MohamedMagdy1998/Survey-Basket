@@ -16,10 +16,11 @@ namespace SurveyBasketAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+          
 
             builder.Services.AddDepenencies();
-        
+            builder.AddDatabase();
+
 
             var app = builder.Build();
 

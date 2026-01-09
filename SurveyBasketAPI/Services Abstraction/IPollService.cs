@@ -4,13 +4,10 @@ namespace SurveyBasketAPI.Services_Abstraction;
 
 public interface IPollService
 {
-    public IEnumerable<Poll> GetAll();
-
-    public Poll? GetById(int id);
-
-    public Poll AddPoll(Poll poll);
-
-    public bool Update(int id,Poll poll);
-
-    public bool Delete(int id);
+    Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Poll?> GetAsync(int id, CancellationToken cancellationToken = default);
+    Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(int id, Poll poll, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default);
 }

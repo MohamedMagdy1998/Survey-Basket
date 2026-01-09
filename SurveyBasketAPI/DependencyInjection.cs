@@ -1,8 +1,11 @@
-﻿using FluentValidation;
+﻿
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using SurveyBasketAPI.Mapping;
+using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 using System.Reflection;
@@ -26,6 +29,13 @@ public static class DependenyInjection
         return service;
     }
 
+    public static void AddDatabase(this WebApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        builder.Services.AddDbContext<SurveyBasketDbContext>(options =>
+            options.UseSqlServer(connectionString));
+    }
+
 
     public static IServiceCollection AddSwagger(this IServiceCollection service)
     {
@@ -36,11 +46,11 @@ public static class DependenyInjection
 
     public static IServiceCollection AddMapsterConfiguration(this IServiceCollection service)
     {
-      var MappingConfiguration = TypeAdapterConfig.GlobalSettings;
-    MappingConfiguration.Scan(Assembly.GetExecutingAssembly());
+        var MappingConfiguration = TypeAdapterConfig.GlobalSettings;
+        MappingConfiguration.Scan(Assembly.GetExecutingAssembly());
 
-       service.AddSingleton<IMapper>
-            (new Mapper(MappingConfiguration));
+        service.AddSingleton<IMapper>
+             (new Mapper(MappingConfiguration));
         return service;
     }
 

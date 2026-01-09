@@ -1,5 +1,6 @@
 ﻿using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Models;
+using System.Security.Cryptography;
 
 namespace SurveyBasketAPI.Mapping;
 
@@ -10,16 +11,19 @@ public static class ContractMapping
         return new PollResponse(
         poll.Id,
         poll.Title,
-        poll.Description
+        poll.Summary,
+        poll.IsPublished,
+        poll.StartsAt,
+        poll.EndsAt
     );
     }
 
-    public static Poll MapToPoll(this CreatePollRequest poll)
+    public static Poll MapToPoll(this PollRequest poll)
     {
         return new()
         {
             Title = poll.Title,
-            Description = poll.Description,
+            Summary = poll.Summary,
         };
 
     }
