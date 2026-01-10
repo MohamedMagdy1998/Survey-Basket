@@ -16,10 +16,12 @@ namespace SurveyBasketAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-          
 
-            builder.Services.AddDepenencies();
+            
             builder.AddDatabase();
+           builder.AddIdentityConfiguration();
+            builder.Services.AddDepenencies();
+
 
 
             var app = builder.Build();
@@ -32,7 +34,7 @@ namespace SurveyBasketAPI
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

@@ -1,15 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Models;
 
 namespace SurveyBasketAPI.Persistence;
 
-public class SurveyBasketDbContext : DbContext
+public class SurveyBasketDbContext(DbContextOptions<SurveyBasketDbContext> options) :
+    IdentityDbContext<ApplicationUser>(options)
 {
+
     public DbSet<Poll> Polls { get; set; }
-    public SurveyBasketDbContext(DbContextOptions<SurveyBasketDbContext> options) : base(options)
-    {
-        
-    }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

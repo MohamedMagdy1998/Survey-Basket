@@ -3,12 +3,17 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Mapping;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 using System.Reflection;
+using System.Text;
 
 namespace SurveyBasketAPI;
 
@@ -18,12 +23,16 @@ public static class DependenyInjection
     {
         service.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+   
 
-        service.AddSwagger();
+
+
+        service.AddScoped<IAuthService, AuthService>();
+
         service.AddScoped<IPollService, PollService>();
 
+        service.AddSwagger();
         service.AddMapsterConfiguration();
-
         service.AddFluentValidation();
 
         return service;
@@ -34,6 +43,37 @@ public static class DependenyInjection
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<SurveyBasketDbContext>(options =>
             options.UseSqlServer(connectionString));
+    }
+
+    public static void AddIdentityConfiguration(this WebApplicationBuilder builder)
+    {
+       
+
+
+        builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
+
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<SurveyBasketDbContext>();
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(o =>
+        {
+            o.SaveToken = true;
+            o.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("J7MfAb4WcAIMkkigVtIepIILOVJEjAcB")),
+                ValidIssuer = "SurveyBasketApp",
+                ValidAudience = "SurveyBasketApp users"
+            };
+        });
     }
 
 
