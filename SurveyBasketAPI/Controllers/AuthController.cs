@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Services_Abstraction;
 
 namespace SurveyBasketAPI.Controllers;
@@ -17,7 +18,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> LoginAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest loginRequest, CancellationToken cancellationToken = default)
     {
         var authResult = await AuthService.GetTokenAsync(loginRequest.Email, loginRequest.Password, cancellationToken);
         if (authResult == null)

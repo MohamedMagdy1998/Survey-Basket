@@ -3,7 +3,7 @@ using SurveyBasketAPI.DTOs;
 
 namespace SurveyBasketAPI.Validations;
 
-public class LogInRequestValidations : AbstractValidator<LoginRequest>
+public class LogInRequestValidations : AbstractValidator<UserLoginRequest>
 {
     public LogInRequestValidations()
     {

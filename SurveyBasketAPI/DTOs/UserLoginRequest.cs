@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasketAPI.DTOs;
 
-public record LoginRequest(
+public record UserLoginRequest(
     string Email,
     string Password
 );

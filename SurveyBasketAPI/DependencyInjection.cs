@@ -7,8 +7,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using SurveyBasketAPI.DataSeeding;
 using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Mapping;
+using SurveyBasketAPI.Option_Pattern;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
@@ -19,13 +22,15 @@ namespace SurveyBasketAPI;
 
 public static class DependenyInjection
 {
-    public static IServiceCollection AddDepenencies(this IServiceCollection service)
+    public static IServiceCollection AddDepenencies(this IServiceCollection service,IConfiguration configuration=default!)
     {
         service.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-   
 
+        
 
+        service.AddDatabase(configuration);
+        service.AddIdentityConfiguration(configuration);
 
         service.AddScoped<IAuthService, AuthService>();
 
@@ -38,24 +43,29 @@ public static class DependenyInjection
         return service;
     }
 
-    public static void AddDatabase(this WebApplicationBuilder builder)
+    public static IServiceCollection AddDatabase(this IServiceCollection service, IConfiguration configuration)
     {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<SurveyBasketDbContext>(options =>
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        service.AddDbContext<SurveyBasketDbContext>(options =>
             options.UseSqlServer(connectionString));
+        return service;
     }
 
-    public static void AddIdentityConfiguration(this WebApplicationBuilder builder)
+    public static IServiceCollection AddIdentityConfiguration(this IServiceCollection service, IConfiguration configuration)
     {
-       
-
-
-        builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
-
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        service.AddSingleton<IJwtProvider, JwtProvider>();
+        service.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<SurveyBasketDbContext>();
 
-        builder.Services.AddAuthentication(options =>
+        //service.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        service.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations().ValidateOnStart();
+
+        var JWTsettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+
+
+        service.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -69,17 +79,19 @@ public static class DependenyInjection
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("J7MfAb4WcAIMkkigVtIepIILOVJEjAcB")),
-                ValidIssuer = "SurveyBasketApp",
-                ValidAudience = "SurveyBasketApp users"
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWTsettings!.Key)),
+                ValidIssuer = JWTsettings.Issuer,
+                ValidAudience = JWTsettings.Audience
             };
         });
+        return service;
     }
 
 
     public static IServiceCollection AddSwagger(this IServiceCollection service)
     {
         service.AddEndpointsApiExplorer();
+       
         service.AddSwaggerGen();
         return service;
     }
