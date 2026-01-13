@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 
 namespace SurveyBasketAPI.Controllers;
@@ -28,4 +29,24 @@ public class AuthController : ControllerBase
         return Ok(authResult);
     }
 
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest refreshTokenRequest, CancellationToken cancellationToken = default)
+    {
+        var authResult = await AuthService.GetNewTokenAndRefreshTokenAsync(refreshTokenRequest.Token, refreshTokenRequest.RefreshToken, cancellationToken);
+        if (authResult == null)
+        {
+            return BadRequest("Invalid token");
+        }
+        return Ok(authResult);
+    }
+
+    [HttpPut("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var isRevoked = await AuthService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+        return isRevoked ? Ok() : BadRequest("Operation failed");
+    }
+
 }
+     
