@@ -27,7 +27,7 @@ public static class DependenyInjection
         service.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-        
+        service._AddCors();
 
         service.AddDatabase(configuration);
         service.AddIdentityConfiguration(configuration);
@@ -40,6 +40,21 @@ public static class DependenyInjection
         service.AddMapsterConfiguration();
         service.AddFluentValidation();
 
+        return service;
+    }
+
+
+    public static IServiceCollection _AddCors(this IServiceCollection service)
+    {
+        service.AddCors(options =>
+        {
+            options.AddDefaultPolicy( builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
+        });
         return service;
     }
 

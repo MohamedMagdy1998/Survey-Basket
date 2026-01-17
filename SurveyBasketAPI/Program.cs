@@ -39,6 +39,7 @@ namespace SurveyBasketAPI
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
+            app.UseCors();
             app.UseAuthorization();
 
 
