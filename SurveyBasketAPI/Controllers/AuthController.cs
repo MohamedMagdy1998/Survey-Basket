@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.Result_Pattern;
+using SurveyBasketAPI.Result_Pattern.Entities_Errors;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 
@@ -22,11 +24,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest loginRequest, CancellationToken cancellationToken = default)
     {
         var authResult = await AuthService.GetTokenAsync(loginRequest.Email, loginRequest.Password, cancellationToken);
-        if (authResult == null)
+        if (authResult.IsFailure)
         {
-            return BadRequest("Invalid email or password");
+            return BadRequest(authResult.Error);
         }
-        return Ok(authResult);
+        return Ok(authResult.Value);
     }
 
     [HttpPost("refresh")]
@@ -37,7 +39,7 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Invalid token");
         }
-        return Ok(authResult);
+        return Ok(authResult.Value);
     }
 
     [HttpPut("revoke-refresh-token")]
@@ -45,7 +47,7 @@ public class AuthController : ControllerBase
     {
         var isRevoked = await AuthService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-        return isRevoked ? Ok() : BadRequest("Operation failed");
+        return isRevoked.IsSuccess ? Ok() : BadRequest("Operation failed");
     }
 
 }

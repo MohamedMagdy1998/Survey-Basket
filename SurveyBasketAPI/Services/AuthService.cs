@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Entities;
+using SurveyBasketAPI.Result_Pattern;
+using SurveyBasketAPI.Result_Pattern.Entities_Errors;
 using SurveyBasketAPI.Services_Abstraction;
 using System.Security.Cryptography;
 
@@ -17,20 +19,21 @@ public class AuthService : IAuthService
         _userManager = userManager;
         JwtProvider = jwtProvider;
     }
-    public async Task<AuthResponse?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         // Check User
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            return null;
+            return Result.Failure<AuthResponse>((UserErrors.InvalidCredentials));
         }
 
         // Check Password
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
         if (!isPasswordValid)
         {
-            return null;
+            return Result.Failure<AuthResponse>((UserErrors.InvalidCredentials));
+
         }
 
         // Generate Token
@@ -48,49 +51,52 @@ public class AuthService : IAuthService
 
         await _userManager.UpdateAsync(user);
 
-        return new AuthResponse(user.Id, user.FirstName,user.LastName,user.Email, token, expiresIn, refreshToken, refreshTokenExpirattion);
+        var response = new AuthResponse(user.Id, user.FirstName, user.LastName, user.Email, token, expiresIn, refreshToken, refreshTokenExpirattion);
+
+        return Result.Success(response);
     }
 
-    public async Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
     {
         var userId = JwtProvider.ValidateToken(token);
 
         if (userId is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidCredentials);
 
         var user = await _userManager.FindByIdAsync(userId);
 
         if (user is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidCredentials);
 
         var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
 
         if (userRefreshToken is null)
-            return false;
+            return Result.Failure(UserErrors.InvalidCredentials);
 
         userRefreshToken.RevokedOn = DateTime.UtcNow;
 
         await _userManager.UpdateAsync(user);
 
-        return true;
+        return Result.Success();
     }
 
-    public async Task<AuthResponse?> GetNewTokenAndRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResponse>> GetNewTokenAndRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
     {
         var userId = JwtProvider.ValidateToken(token);
         if (userId == null)
         {
-            return null!;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+
         }
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return null!;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
         }
         var userRefreshToken = user.RefreshTokens.SingleOrDefault(rt => rt.Token == refreshToken && rt.IsActive);
         if (userRefreshToken == null)
         {
-            return null!;
+            return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
         }
         userRefreshToken.RevokedOn = DateTime.UtcNow;
         var (newToken, newExpiresIn) = JwtProvider.GenerateToken(user);
@@ -103,7 +109,8 @@ public class AuthService : IAuthService
         });
 
         await _userManager.UpdateAsync(user);
-        return new AuthResponse(user.Id, user.FirstName, user.LastName, user.Email, newToken, newExpiresIn, newRefreshToken!, newRefreshTokenExpiration);
+        var response = new AuthResponse(user.Id, user.FirstName, user.LastName, user.Email, newToken, newExpiresIn, newRefreshToken!, newRefreshTokenExpiration);
+        return Result.Success(response);
     }
 
     private static string GenerateRefreshToken()
