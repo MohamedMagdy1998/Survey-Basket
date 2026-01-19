@@ -11,6 +11,7 @@ using Microsoft.OpenApi;
 using SurveyBasketAPI.DataSeeding;
 using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Mapping;
+using SurveyBasketAPI.Middleware;
 using SurveyBasketAPI.Option_Pattern;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Services;
@@ -35,6 +36,9 @@ public static class DependenyInjection
         service.AddScoped<IAuthService, AuthService>();
 
         service.AddScoped<IPollService, PollService>();
+
+        service.AddExceptionHandler<GlobalExceptionHandler>();
+        service.AddProblemDetails();
 
         service.AddSwagger();
         service.AddMapsterConfiguration();

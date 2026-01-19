@@ -4,6 +4,7 @@ using Mapster;
 using MapsterMapper;
 using SurveyBasketAPI.DataSeeding;
 using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.Middleware;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 using SurveyBasketAPI.Validations;
@@ -37,6 +38,7 @@ namespace SurveyBasketAPI
 
             }
 
+            app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseCors();

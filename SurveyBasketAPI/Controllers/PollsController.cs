@@ -1,10 +1,12 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Mapping;
 using SurveyBasketAPI.Models;
 using SurveyBasketAPI.Result_Pattern;
+using SurveyBasketAPI.Result_Pattern.Entities_Errors;
 using SurveyBasketAPI.Services_Abstraction;
 
 namespace SurveyBasketAPI.Controllers;
@@ -31,8 +33,7 @@ public class PollsController(IPollService pollService) : ControllerBase
         var result = await _pollService.GetAsync(id, cancellationToken);
 
         if (result.IsFailure)
-            return NotFound(result.Error);
-
+            return result.ToProblem(statusCode: StatusCodes.Status400BadRequest);
         return Ok(result.Value);
     }
 
@@ -42,7 +43,10 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var newPoll = await _pollService.AddAsync(request, cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll.Adapt<PollResponse>());
+        if (newPoll.IsFailure)
+            return newPoll.ToProblem(statusCode: StatusCodes.Status409Conflict);
+        
+        return CreatedAtAction(nameof(Get), new { id = newPoll.Value.Id }, newPoll.Adapt<PollResponse>());
     }
 
     [HttpPut("{id}")]
@@ -51,10 +55,14 @@ public class PollsController(IPollService pollService) : ControllerBase
     {
         var isUpdated = await _pollService.UpdateAsync(id, request, cancellationToken);
 
-        if (isUpdated.IsFailure)
-            return NotFound(isUpdated.Error);
+        if (isUpdated.IsSuccess)
+            return NoContent();
 
-        return NoContent();
+        return isUpdated.Error.Equals(PollErrors.PollAlreadyExists)
+                 ? isUpdated.ToProblem(StatusCodes.Status409Conflict)
+                 : isUpdated.ToProblem(StatusCodes.Status404NotFound);
+
+       
     }
 
     [HttpDelete("{id}")]
@@ -63,7 +71,7 @@ public class PollsController(IPollService pollService) : ControllerBase
         var isDeleted = await _pollService.DeleteAsync(id, cancellationToken);
 
         if (isDeleted.IsFailure)
-            return NotFound(isDeleted.Error);
+            return isDeleted.ToProblem(statusCode: StatusCodes.Status404NotFound);
 
         return NoContent();
     }
@@ -74,7 +82,7 @@ public class PollsController(IPollService pollService) : ControllerBase
         var isUpdated = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
 
         if (isUpdated.IsFailure)
-            return NotFound(isUpdated.Error);
+            return isUpdated.ToProblem(statusCode: StatusCodes.Status404NotFound);
 
         return NoContent();
     }

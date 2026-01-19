@@ -29,22 +29,33 @@ public class PollService(SurveyBasketDbContext context) : IPollService
     }
        
 
-    public async Task<PollResponse> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<PollResponse>> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
     {
+        var exists = await _context.Polls.AnyAsync(p => p.Title.ToLower() == request.Title.ToLower(), cancellationToken);
+
+        if (exists)
+            return Result.Failure<PollResponse>(PollErrors.PollAlreadyExists);
+
         var poll = request.Adapt<Poll>();
 
         await _context.AddAsync(poll, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return poll.Adapt<PollResponse>();
+        return Result.Success(poll.Adapt<PollResponse>());
     }
 
     public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
     {
+
         var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
 
         if (currentPoll is null)
             return Result.Failure(PollErrors.PollNotFound);
+
+         var exists = await _context.Polls.AnyAsync(p => p.Title.ToLower() == poll.Title.ToLower() && p.Id != id, cancellationToken);
+        
+        if (exists)
+            return Result.Failure(PollErrors.PollAlreadyExists);
 
         currentPoll.Title = poll.Title;
         currentPoll.Summary = poll.Summary;
