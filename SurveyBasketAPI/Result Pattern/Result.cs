@@ -22,10 +22,10 @@ public class Result
     }
     public static Result Success() => new Result( true, Error.None);
 
-    public static Result Failure(Error error) => new Result( true,error);
+    public static Result Failure(Error error) => new Result( false,error);
     public static Result<TValue> Success<TValue>(TValue value) => new Result<TValue>(value, true, Error.None);
 
-    public static Result<TValue> Failure<TValue>(Error error) => new Result<TValue>(default!, true, error);
+    public static Result<TValue> Failure<TValue>(Error error) => new Result<TValue>(default!, false, error);
 
 
 }

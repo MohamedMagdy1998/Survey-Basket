@@ -11,18 +11,36 @@ public class SurveyBasketDbContext(DbContextOptions<SurveyBasketDbContext> optio
 {
     private readonly IHttpContextAccessor HttpContextAccessor = httpContextAccessor;
 
+    public DbSet<Answer> Answers { get; set; }
     public DbSet<Poll> Polls { get; set; }
+    public DbSet<Question> Questions { get; set; }
+
+    
+
+
+
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(SurveyBasketDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(SurveyBasketDbContext).Assembly);
+
+        var foreignKeys = modelBuilder.Model
+        .GetEntityTypes()
+        .SelectMany(e => e.GetForeignKeys())
+        .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
+
+        foreach (var foreignKey in foreignKeys)
+        {
+
+            foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+        }
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var entries = ChangeTracker.Entries<AuditableEntity>();
+       var entries = ChangeTracker.Entries<AuditableEntity>();
 
         foreach (var entityEntry in entries)
         {
@@ -32,7 +50,7 @@ public class SurveyBasketDbContext(DbContextOptions<SurveyBasketDbContext> optio
             {
                 entityEntry.Property(x => x.CreatedById).CurrentValue = currentUserId;
             }
-            else if (entityEntry.State == EntityState.Modified)
+            else if(entityEntry.State == EntityState.Modified)
             {
                 entityEntry.Property(x => x.UpdatedById).CurrentValue = currentUserId;
                 entityEntry.Property(x => x.UpdatedOn).CurrentValue = DateTime.UtcNow;

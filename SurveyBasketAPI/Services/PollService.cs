@@ -37,6 +37,7 @@ public class PollService(SurveyBasketDbContext context) : IPollService
             return Result.Failure<PollResponse>(PollErrors.PollAlreadyExists);
 
         var poll = request.Adapt<Poll>();
+        
 
         await _context.AddAsync(poll, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
@@ -69,7 +70,7 @@ public class PollService(SurveyBasketDbContext context) : IPollService
 
     public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        var poll = await GetAsync(id, cancellationToken);
+        var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
         if (poll is null)
             return Result.Failure(PollErrors.PollNotFound);
