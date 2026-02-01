@@ -13,7 +13,7 @@ public interface IQuestionService
 
     public Task<Result> ToggleStatusAsync(int pollId, int questionId, CancellationToken cancellationToken = default);
 
-
+    public Task<Result<IEnumerable<QuestionResponse>>> GetAvailableAsync(int pollId, string userId, CancellationToken cancellationToken = default);
 
 
 }
