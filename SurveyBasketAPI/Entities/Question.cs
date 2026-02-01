@@ -16,4 +16,6 @@ public class Question : AuditableEntity
 
     public ICollection<Answer> Answers { get; set; } = [];
 
+    public ICollection<VoteAnswer> Votes { get; set; } = [];
+
 };

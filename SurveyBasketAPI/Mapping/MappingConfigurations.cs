@@ -1,5 +1,5 @@
 ﻿using Mapster;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Questions;
 using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Models;
 

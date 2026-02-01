@@ -38,6 +38,7 @@ public static class DependenyInjection
         service.AddScoped<IPollService, PollService>();
         service.AddScoped<IQuestionService, QuestionService>(); 
         service.AddScoped<IVoteService, VoteService>();
+        service.AddScoped<IResultService, ResultService>();
 
         service.AddExceptionHandler<GlobalExceptionHandler>();
         service.AddProblemDetails();

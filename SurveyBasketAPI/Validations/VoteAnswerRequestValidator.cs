@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Votes;
 
 namespace SurveyBasketAPI.Validations;
 

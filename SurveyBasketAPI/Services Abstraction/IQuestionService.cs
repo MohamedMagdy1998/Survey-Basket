@@ -1,4 +1,4 @@
-﻿using SurveyBasketAPI.DTOs;
+﻿using SurveyBasketAPI.DTOs.Questions;
 using SurveyBasketAPI.Result_Pattern;
 
 namespace SurveyBasketAPI.Services_Abstraction;

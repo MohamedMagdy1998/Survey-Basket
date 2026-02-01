@@ -1,6 +1,6 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Votes;
 using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Result_Pattern;

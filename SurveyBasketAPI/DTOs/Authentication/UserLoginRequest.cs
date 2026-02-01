@@ -1,4 +1,4 @@
-﻿namespace SurveyBasketAPI.DTOs;
+﻿namespace SurveyBasketAPI.DTOs.Authentication;
 
 public record UserLoginRequest(
     string Email,

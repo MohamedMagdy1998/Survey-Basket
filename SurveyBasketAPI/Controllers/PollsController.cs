@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Polls;
 using SurveyBasketAPI.Mapping;
 using SurveyBasketAPI.Models;
 using SurveyBasketAPI.Result_Pattern;

@@ -1,4 +1,6 @@
-﻿namespace SurveyBasketAPI.DTOs;
+﻿using SurveyBasketAPI.DTOs.Answers;
+
+namespace SurveyBasketAPI.DTOs.Questions;
 
 public record QuestionResponse(
     int Id,

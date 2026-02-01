@@ -1,4 +1,4 @@
-﻿using SurveyBasketAPI.DTOs;
+﻿using SurveyBasketAPI.DTOs.Polls;
 using SurveyBasketAPI.Models;
 using System.Security.Cryptography;
 

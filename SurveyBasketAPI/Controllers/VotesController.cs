@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Votes;
 using SurveyBasketAPI.Extensions;
 using SurveyBasketAPI.Result_Pattern;
 using SurveyBasketAPI.Result_Pattern.Entities_Errors;

@@ -2,7 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Polls;
 using SurveyBasketAPI.Models;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Result_Pattern;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using SurveyBasketAPI.DTOs;
+using SurveyBasketAPI.DTOs.Authentication;
 using SurveyBasketAPI.Entities;
 using SurveyBasketAPI.Result_Pattern;
 using SurveyBasketAPI.Result_Pattern.Entities_Errors;
