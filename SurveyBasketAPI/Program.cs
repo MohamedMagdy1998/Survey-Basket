@@ -2,6 +2,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 using SurveyBasketAPI.DataSeeding;
 using SurveyBasketAPI.DTOs;
 using SurveyBasketAPI.Middleware;
@@ -22,9 +24,12 @@ namespace SurveyBasketAPI
 
             builder.Services.AddDepenencies(builder.Configuration);
 
-
+            builder.Host.UseSerilog((Context, Configuration) =>
+            Configuration.ReadFrom.Configuration(Context.Configuration));
+            
 
             var app = builder.Build();
+
             using (var scope = app.Services.CreateScope())
             {
                 await CreateUser.SeedUserAsync(scope.ServiceProvider);
@@ -38,6 +43,7 @@ namespace SurveyBasketAPI
 
             }
 
+            app.UseSerilogRequestLogging();
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthentication();
