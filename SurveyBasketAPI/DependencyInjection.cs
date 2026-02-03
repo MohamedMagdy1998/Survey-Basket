@@ -32,6 +32,7 @@ public static class DependenyInjection
 
         service.AddDatabase(configuration);
         service.AddIdentityConfiguration(configuration);
+        service.AddHybridCache();
 
         service.AddScoped<IAuthService, AuthService>();
 
@@ -39,6 +40,7 @@ public static class DependenyInjection
         service.AddScoped<IQuestionService, QuestionService>(); 
         service.AddScoped<IVoteService, VoteService>();
         service.AddScoped<IResultService, ResultService>();
+        //service.AddScoped<ICacheService, CacheService>();
 
         service.AddExceptionHandler<GlobalExceptionHandler>();
         service.AddProblemDetails();

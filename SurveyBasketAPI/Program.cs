@@ -27,6 +27,7 @@ namespace SurveyBasketAPI
             builder.Host.UseSerilog((Context, Configuration) =>
             Configuration.ReadFrom.Configuration(Context.Configuration));
             
+            builder.Services.AddDistributedMemoryCache();
 
             var app = builder.Build();
 
