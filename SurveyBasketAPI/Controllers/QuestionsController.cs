@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBasketAPI.Common;
 using SurveyBasketAPI.DTOs.Questions;
 using SurveyBasketAPI.Result_Pattern;
 using SurveyBasketAPI.Result_Pattern.Entities_Errors;
@@ -21,9 +22,9 @@ public class QuestionsController : ControllerBase
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetQuestions([FromRoute] int pollId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestions([FromRoute] int pollId, [FromQuery] PaginationFilters paginationFilters, CancellationToken cancellationToken)
     {
-        var questionsResult = await _questionService.GetAllAsync(pollId, cancellationToken);
+        var questionsResult = await _questionService.GetAllAsync(pollId, paginationFilters,cancellationToken);
         return (questionsResult.IsSuccess) ? Ok(questionsResult.Value) : questionsResult.ToProblem();
     }
 

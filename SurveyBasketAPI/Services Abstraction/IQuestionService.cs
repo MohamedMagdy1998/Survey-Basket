@@ -1,12 +1,14 @@
-﻿using SurveyBasketAPI.DTOs.Questions;
+﻿using SurveyBasketAPI.Common;
+using SurveyBasketAPI.DTOs.Questions;
 using SurveyBasketAPI.Result_Pattern;
+using SurveyBasketAPI.Services;
 
 namespace SurveyBasketAPI.Services_Abstraction;
 
 public interface IQuestionService
 {
     public Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request,CancellationToken cancellationToken);
-    public Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync (int pollId, CancellationToken cancellationToken);
+    public Task<Result<PaginatedResult<QuestionResponse>>> GetAllAsync (int pollId, PaginationFilters paginationFilters, CancellationToken cancellationToken);
     public Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken);
 
     public Task<Result> UpdateAsync(int pollId, int questionId, QuestionRequest request, CancellationToken cancellationToken);

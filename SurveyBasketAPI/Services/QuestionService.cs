@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
+using SurveyBasketAPI.Common;
 using SurveyBasketAPI.DTOs.Answers;
 using SurveyBasketAPI.DTOs.Questions;
 using SurveyBasketAPI.Entities;
@@ -8,6 +9,7 @@ using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Result_Pattern;
 using SurveyBasketAPI.Result_Pattern.Entities_Errors;
 using SurveyBasketAPI.Services_Abstraction;
+using System.Buffers;
 using System.Diagnostics.Contracts;
 
 namespace SurveyBasketAPI.Services;
@@ -55,26 +57,32 @@ public class QuestionService : IQuestionService
         return Result.Success(question.Adapt<Question,QuestionResponse>());
     }
 
-    public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<QuestionResponse>>> GetAllAsync(int pollId, PaginationFilters paginationFilters, CancellationToken cancellationToken)
     {
         var isPollExists = await _dbContext.Polls.AnyAsync(p => p.Id == pollId, cancellationToken);
 
         if (!isPollExists)
         {
-            return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+            return Result.Failure<PaginatedResult<QuestionResponse>>(PollErrors.PollNotFound);
         }
 
-        var questions = await _dbContext.Questions
-            .Where(q => q.PollId == pollId)
+        var questions = _dbContext.Questions
+            .Where(q => q.PollId == pollId&&(string.IsNullOrWhiteSpace(paginationFilters.SearchValue)|| q.Content.ToLower().Contains(paginationFilters.SearchValue.ToLower())))
             .Include(q => q.Answers)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+            .AsNoTracking();
+
+        if(!string.IsNullOrWhiteSpace(paginationFilters.SortColumn) && paginationFilters.SortColumn.Equals("content", StringComparison.OrdinalIgnoreCase))
+        {
+            questions = paginationFilters.SortDirection!.Equals("Desc", StringComparison.OrdinalIgnoreCase) ? questions.OrderByDescending(q => q.Content) : questions.OrderBy(q => q.Content);
+        }
+           
         if (!questions.Any())
         {
-            return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionNotFound);
+            return Result.Failure<PaginatedResult<QuestionResponse>>(QuestionErrors.QuestionNotFound);
         }
 
-        return Result.Success(questions.Adapt<IEnumerable<Question>, IEnumerable<QuestionResponse>>());
+        var paginatedResult = await PaginatedResult<QuestionResponse>.CreatePagination(questions.ProjectToType<QuestionResponse>(), paginationFilters.PageNumber, paginationFilters.PageSize, cancellationToken);
+        return Result.Success(paginatedResult);
     }
 
     public async Task<Result<QuestionResponse>> GetAsync(int pollId, int questionId, CancellationToken cancellationToken)
