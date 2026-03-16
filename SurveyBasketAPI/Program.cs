@@ -1,5 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.Configuration;
@@ -32,9 +34,9 @@ namespace SurveyBasketAPI
 
             var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
+            using (var myscope = app.Services.CreateScope())
             {
-                await CreateUser.SeedUserAsync(scope.ServiceProvider);
+                await CreateUser.SeedUserAsync(myscope.ServiceProvider);
             }
 
             // Configure the HTTP request pipeline.
@@ -52,7 +54,27 @@ namespace SurveyBasketAPI
                     options.EnableFilter();
                     options.EnablePersistAuthorization();
                 });
+
+                app.UseHangfireDashboard("/jobs", new DashboardOptions
+                {
+                    Authorization = new[] {
+                        new HangfireCustomBasicAuthenticationFilter
+                    {
+                        User = app.Configuration.GetValue<string>("HangfireSettings:UserName"),
+                        Pass = app.Configuration.GetValue<string>("HangfireSettings:Password")
+                    }
+                    },
+                    DashboardTitle = "Survey Basket Dashboard"
+                });
+
             }
+
+            var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+            using var scope = scopeFactory.CreateScope();
+            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+            RecurringJob.AddOrUpdate("SendNewPollsNotification", () => notificationService.SendNewPollsNotification(null), Cron.Daily);
+
 
             app.UseSerilogRequestLogging();
 

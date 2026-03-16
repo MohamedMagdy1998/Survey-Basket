@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using SurveyBasketAPI.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Hangfire;
 
 namespace SurveyBasketAPI;
 
@@ -42,6 +43,7 @@ public static class DependenyInjection
         service.AddScoped<IVoteService, VoteService>();
         service.AddScoped<IResultService, ResultService>();
         service.AddScoped<IEmailSender, EmailService>();
+        service.AddScoped<INotificationService, NotificationService>();
         service.AddHealthChecks();
         service.AddHttpContextAccessor();
 
@@ -51,6 +53,9 @@ public static class DependenyInjection
         service.AddSwagger();
         service.AddMapsterConfiguration();
         service.AddFluentValidation();
+
+
+        service.AddBackgroundJobsConfiguration(configuration);
 
         return service;
     }
@@ -179,5 +184,17 @@ public static class DependenyInjection
         return service;
     }
 
+    public static IServiceCollection AddBackgroundJobsConfiguration(this IServiceCollection service, IConfiguration configuration)
+    {
+        service.AddHangfire(config => config
+       .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+       .UseSimpleAssemblyNameTypeSerializer()
+       .UseRecommendedSerializerSettings()
+       .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
 
+
+        service.AddHangfireServer();
+
+        return service;
+    }
 }
