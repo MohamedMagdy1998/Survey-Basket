@@ -10,6 +10,7 @@ using SurveyBasketAPI.Middleware;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 using SurveyBasketAPI.Validations;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -40,16 +41,27 @@ namespace SurveyBasketAPI
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
-
+                app.UseSwaggerUI(options =>
+                {
+                    options.ConfigObject = new ConfigObject()
+                    {
+                        DisplayRequestDuration = true,
+                    };
+                    options.DocumentTitle = "Survey Basket App";
+                    options.DocExpansion(DocExpansion.None);
+                    options.EnableFilter();
+                    options.EnablePersistAuthorization();
+                });
             }
 
             app.UseSerilogRequestLogging();
+
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseCors();
             app.UseAuthorization();
+            app.MapHealthChecks("health");
 
 
             app.MapControllers();

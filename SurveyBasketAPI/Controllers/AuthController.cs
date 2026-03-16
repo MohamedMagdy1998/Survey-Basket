@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using SurveyBasketAPI.DTOs.Authentication;
 using SurveyBasketAPI.Result_Pattern;
-using SurveyBasketAPI.Result_Pattern.Entities_Errors;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 
@@ -19,6 +17,31 @@ public class AuthController : ControllerBase
     {
         AuthService = authService;
     }
+    
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request, CancellationToken cancellationToken)
+    {
+        var result = await AuthService.ConfirmEmailAsync(request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+    [HttpPost("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfigurationEmail request, CancellationToken cancellationToken)
+    {
+        var result = await AuthService.ResendConfirmationEmailAsync(request);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] DTOs.Authentication.RegisterRequest request, CancellationToken cancellationToken)
+    {
+        var result = await AuthService.RegisterAsync(request, cancellationToken);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
 
     [HttpPost("")]
     public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest loginRequest, CancellationToken cancellationToken = default)

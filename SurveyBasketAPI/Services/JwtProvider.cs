@@ -58,7 +58,7 @@ public class JwtProvider : IJwtProvider
                 IssuerSigningKey = symmetricSecurityKey,
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero //Set clock skew to zero to prevent token expiration issues
             }, out SecurityToken validatedToken);
             var jwtToken = (JwtSecurityToken)validatedToken;
             var userId = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;

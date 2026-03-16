@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.OpenApi.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
@@ -7,10 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using SurveyBasketAPI.DataSeeding;
 using SurveyBasketAPI.Entities;
-using SurveyBasketAPI.Mapping;
 using SurveyBasketAPI.Middleware;
 using SurveyBasketAPI.Option_Pattern;
 using SurveyBasketAPI.Persistence;
@@ -18,6 +15,8 @@ using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
 using System.Reflection;
 using System.Text;
+using SurveyBasketAPI.Settings;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace SurveyBasketAPI;
 
@@ -30,6 +29,8 @@ public static class DependenyInjection
 
         service._AddCors();
 
+        service.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+
         service.AddDatabase(configuration);
         service.AddIdentityConfiguration(configuration);
         service.AddHybridCache();
@@ -40,7 +41,9 @@ public static class DependenyInjection
         service.AddScoped<IQuestionService, QuestionService>(); 
         service.AddScoped<IVoteService, VoteService>();
         service.AddScoped<IResultService, ResultService>();
-        //service.AddScoped<ICacheService, CacheService>();
+        service.AddScoped<IEmailSender, EmailService>();
+        service.AddHealthChecks();
+        service.AddHttpContextAccessor();
 
         service.AddExceptionHandler<GlobalExceptionHandler>();
         service.AddProblemDetails();
@@ -79,7 +82,8 @@ public static class DependenyInjection
     {
         service.AddSingleton<IJwtProvider, JwtProvider>();
         service.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<SurveyBasketDbContext>();
+            .AddEntityFrameworkStores<SurveyBasketDbContext>()
+            .AddDefaultTokenProviders();
 
         //service.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         service.AddOptions<JwtOptions>()
@@ -108,6 +112,17 @@ public static class DependenyInjection
                 ValidAudience = JWTsettings.Audience
             };
         });
+
+
+        service.Configure<IdentityOptions>(options =>
+        {
+
+            //options.SignIn.RequireConfirmedEmail = true;
+
+            options.User.RequireUniqueEmail = true ;
+
+            options.Password.RequiredLength = 8;
+        });
         return service;
     }
 
@@ -116,7 +131,34 @@ public static class DependenyInjection
     {
         service.AddEndpointsApiExplorer();
        
-        service.AddSwaggerGen();
+        service.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+            {
+                In = ParameterLocation.Header,
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                Description = "Please enter a word 'Bearer' followed by Space and your Token.'"
+
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference=new OpenApiReference()
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{ }
+                    }
+                });
+
+        });
         return service;
     }
 

@@ -12,17 +12,20 @@ public class Result
 
    
 
-    public Result(bool isSucces,Error error)
+    protected Result(bool isSucces,Error error)
     {
         if ((isSucces && error != Error.None) || (!isSucces && error == Error.None))
             throw new InvalidOperationException();
+
         IsSuccess = isSucces;
         Error = error;
         
     }
+
     public static Result Success() => new Result( true, Error.None);
 
     public static Result Failure(Error error) => new Result( false,error);
+
     public static Result<TValue> Success<TValue>(TValue value) => new Result<TValue>(value, true, Error.None);
 
     public static Result<TValue> Failure<TValue>(Error error) => new Result<TValue>(default!, false, error);
@@ -40,7 +43,19 @@ public class Result<TValue> : Result
     {
         _value = value; 
     }
-   
-   
+
+    // implicit cast from value -> Result<T>
+    public static implicit operator Result<TValue>(TValue value)
+    {
+        return Success<TValue>(value);
+    }
+
+    // implicit cast from Error -> Result<T>
+    public static implicit operator Result<TValue>(Error error)
+    {
+        return Failure<TValue>(error);
+    }
+
+
 
 }

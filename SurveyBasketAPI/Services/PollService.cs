@@ -34,9 +34,9 @@ public class PollService(SurveyBasketDbContext context) : IPollService
     {
       var response =  await _context.Polls.FindAsync(id, cancellationToken);
         if (response is null)
-            return Result.Failure<PollResponse>(PollErrors.PollNotFound);
+            return (PollErrors.PollNotFound);
 
-        return Result.Success(response.Adapt<PollResponse>());
+        return (response.Adapt<PollResponse>());
 
     }
        

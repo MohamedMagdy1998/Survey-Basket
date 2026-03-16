@@ -5,6 +5,7 @@ namespace SurveyBasketAPI.Entities;
 [Owned]
 public class RefreshTokens
 {
+    // composite key of UserId and Id will be used to identify each refresh token uniquely
     public int Id { get; set; }
     public string Token { get; set; } = string.Empty;
 
