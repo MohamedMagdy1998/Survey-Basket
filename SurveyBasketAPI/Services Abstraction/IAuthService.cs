@@ -14,4 +14,8 @@ public interface IAuthService
 
     public Task<Result> ResendConfirmationEmailAsync(ResendConfigurationEmail request);
 
+    public Task<Result> SendResetPasswordCodeAsync(string email);
+
+    Task<Result> ResetPasswordAsync(DTOs.Authentication.ResetPasswordRequest request);
+
 }

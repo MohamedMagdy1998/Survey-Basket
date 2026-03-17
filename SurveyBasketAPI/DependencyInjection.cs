@@ -44,6 +44,10 @@ public static class DependenyInjection
         service.AddScoped<IResultService, ResultService>();
         service.AddScoped<IEmailSender, EmailService>();
         service.AddScoped<INotificationService, NotificationService>();
+        service.AddScoped<IUserService, UserService>();
+
+
+
         service.AddHealthChecks();
         service.AddHttpContextAccessor();
 
