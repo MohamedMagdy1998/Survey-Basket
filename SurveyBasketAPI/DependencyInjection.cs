@@ -1,23 +1,27 @@
-﻿using Microsoft.OpenApi.Models;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using SurveyBasket.Abstractions.Consts;
 using SurveyBasketAPI.Entities;
+using SurveyBasketAPI.Extensions;
 using SurveyBasketAPI.Middleware;
 using SurveyBasketAPI.Option_Pattern;
 using SurveyBasketAPI.Persistence;
 using SurveyBasketAPI.Services;
 using SurveyBasketAPI.Services_Abstraction;
+using SurveyBasketAPI.Settings;
 using System.Reflection;
 using System.Text;
-using SurveyBasketAPI.Settings;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Hangfire;
+using System.Threading.RateLimiting;
 
 namespace SurveyBasketAPI;
 
@@ -61,6 +65,8 @@ public static class DependenyInjection
 
 
         service.AddBackgroundJobsConfiguration(configuration);
+
+        service.AddRateLimitingConfig();
 
         return service;
     }
@@ -201,5 +207,71 @@ public static class DependenyInjection
         service.AddHangfireServer();
 
         return service;
+    }
+
+    private static IServiceCollection AddRateLimitingConfig(this IServiceCollection services)
+    {
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimiterOptions.AddPolicy(RateLimiters.IpLimiter, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromSeconds(20)
+                    }
+                )
+            );
+
+            rateLimiterOptions.AddPolicy(RateLimiters.UserLimiter, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.User.GetUserId(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromSeconds(20)
+                    }
+                )
+            );
+
+            rateLimiterOptions.AddConcurrencyLimiter(RateLimiters.Concurrency, options =>
+            {
+                options.PermitLimit = 1000;
+                options.QueueLimit = 100;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+
+            //rateLimiterOptions.AddTokenBucketLimiter("token", options =>
+            //{
+            //    options.TokenLimit = 2;
+            //    options.QueueLimit = 1;
+            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            //    options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+            //    options.TokensPerPeriod = 2;
+            //    options.AutoReplenishment = true;
+            //});
+
+            //rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
+            //{
+            //    options.PermitLimit = 2;
+            //    options.Window = TimeSpan.FromSeconds(20);
+            //    options.QueueLimit = 1;
+            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            //});
+
+            //rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
+            //{
+            //    options.PermitLimit = 2;
+            //    options.Window = TimeSpan.FromSeconds(20);
+            //    options.SegmentsPerWindow = 2;
+            //    options.QueueLimit = 1;
+            //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            //});
+        });
+
+        return services;
     }
 }

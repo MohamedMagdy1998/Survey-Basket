@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using SurveyBasket.Abstractions.Consts;
 using SurveyBasketAPI.DTOs.Votes;
 using SurveyBasketAPI.Extensions;
 using SurveyBasketAPI.Result_Pattern;
@@ -13,6 +15,7 @@ namespace SurveyBasketAPI.Controllers;
 [Route("api/polls/{pollid}/vote")]
 [ApiController]
 [Authorize]
+[EnableRateLimiting(RateLimiters.Concurrency)]
 public class VotesController : ControllerBase
 {
     private readonly IQuestionService _questionService;
