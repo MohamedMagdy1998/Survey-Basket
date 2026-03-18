@@ -1,0 +1,21 @@
+﻿using Microsoft.AspNetCore.Identity.Data;
+using SurveyBasketAPI.DTOs.Authentication;
+using SurveyBasketAPI.Result_Pattern;
+
+namespace SurveyBasketAPI.Services_Abstraction;
+
+public interface IAuthService
+{
+    public Task<Result> RegisterAsync(DTOs.Authentication.RegisterRequest request, CancellationToken cancellationToken = default);
+    public Task<Result<AuthResponse>> GetTokenAsync(string email, string password,CancellationToken cancellationToken = default);
+    public Task<Result<AuthResponse>> GetNewTokenAndRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
+    public Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default);
+    public Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request);
+
+    public Task<Result> ResendConfirmationEmailAsync(ResendConfigurationEmail request);
+
+    public Task<Result> SendResetPasswordCodeAsync(string email);
+
+    Task<Result> ResetPasswordAsync(DTOs.Authentication.ResetPasswordRequest request);
+
+}

@@ -1,13 +1,16 @@
-﻿using SurveyBasketAPI.Models;
+﻿using SurveyBasketAPI.DTOs.Polls;
+using SurveyBasketAPI.Models;
+using SurveyBasketAPI.Result_Pattern;
 
 namespace SurveyBasketAPI.Services_Abstraction;
 
 public interface IPollService
 {
-    Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<Poll?> GetAsync(int id, CancellationToken cancellationToken = default);
-    Task<Poll> AddAsync(Poll poll, CancellationToken cancellationToken = default);
-    Task<bool> UpdateAsync(int id, Poll poll, CancellationToken cancellationToken = default);
-    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
-    Task<bool> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<PollResponse>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<PollResponse>> GetCurentAsync(CancellationToken cancellationToken = default);
+    Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default);
+    Task<Result<PollResponse>> AddAsync(PollRequest poll, CancellationToken cancellationToken = default);
+    Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default);
+    Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default);
 }

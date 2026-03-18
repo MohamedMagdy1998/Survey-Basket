@@ -1,6 +1,8 @@
-﻿namespace SurveyBasketAPI.Models;
+﻿using SurveyBasketAPI.Entities;
 
-public class Poll
+namespace SurveyBasketAPI.Models;
+
+public class Poll : AuditableEntity
 {
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -11,5 +13,8 @@ public class Poll
     public DateOnly StartsAt { get; set; }
 
     public DateOnly EndsAt { get; set; }
+    public ICollection<Question> Questions { get; set; } = [];
+
+    public ICollection<Vote> Votes { get; set; } = [];
 
 }

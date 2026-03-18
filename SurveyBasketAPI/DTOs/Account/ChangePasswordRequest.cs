@@ -1,0 +1,7 @@
+﻿namespace SurveyBasketAPI.DTOs.Account;
+
+public record ChangePasswordRequest
+(
+    string CurrentPassword,
+    string NewPassword
+);
