@@ -48,7 +48,8 @@ public static class DependenyInjection
 
 
 
-        service.AddHealthChecks();
+        service.AddHealthChecks().AddDbContextCheck<SurveyBasketDbContext>(name: "Database")
+             .AddHangfire(options => { options.MinimumAvailableServers = 1; });
         service.AddHttpContextAccessor();
 
         service.AddExceptionHandler<GlobalExceptionHandler>();

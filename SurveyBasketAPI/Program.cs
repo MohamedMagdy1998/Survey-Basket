@@ -2,8 +2,10 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using HealthChecks.UI.Client;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using SurveyBasketAPI.DataSeeding;
@@ -83,7 +85,13 @@ namespace SurveyBasketAPI
             app.UseAuthentication();
             app.UseCors();
             app.UseAuthorization();
-            app.MapHealthChecks("health");
+            app.MapHealthChecks("health",new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+
+
+
+            });
 
 
             app.MapControllers();
